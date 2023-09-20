@@ -1,18 +1,54 @@
-import React, { Fragment } from 'react'
+// pages/meetups/[meetid].js
 
-const index = () => {
+import MeetupDetail from "@/components/meetups/MeetupDeatils";
+
+function MeetupDetails({ meetupData }) {
   return (
-      <Fragment>
-        <div style={{textAlign:'center'}}>
-        <img src="https://media.istockphoto.com/id/868580472/photo/black-sands-beach-shelter-cove-ca.jpg?s=612x612&w=0&k=20&c=NlItKyYXQbjB9YezZpTol9LS_IlRIJby9baVvmu_cJY=" alt="abc"/>
-        <h1>A First Meet</h1>
-        <address>some street addres is here</address>
-        <p>The meetup Adreess</p>
-        <p>jahsqyh</p>
-        </div>
-      </Fragment>
-    
-  )
+    <MeetupDetail
+      image={meetupData.image}
+      title={meetupData.title}
+      address={meetupData.address}
+      description={meetupData.description}
+    />
+  );
 }
 
-export default index
+export async function getStaticPaths() {
+  return {
+    fallback: false,
+    paths: [
+      {
+        params: {
+          meetid: 'm1', // Use "meetid" here
+        },
+      },
+      {
+        params: {
+          meetid: 'm2', // Use "meetid" here
+        },
+      },
+    ],
+  };
+}
+
+export async function getStaticProps(context) {
+  // fetch data for a single meetup
+  const meetid = context.params.meetid; // Use "meetid" here
+
+  // Replace this with your actual data fetching logic
+  const meetupData = {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg',
+    id: meetid, // Use "meetid" here
+    title: 'First Meetup',
+    address: 'Some Street 5, Some City',
+    description: 'This is a first meetup',
+  };
+
+  return {
+    props: {
+      meetupData,
+    },
+  };
+}
+
+export default MeetupDetails;
