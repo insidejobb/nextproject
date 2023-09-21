@@ -1,52 +1,65 @@
-// pages/meetups/[meetid].js
+import { MongoClient, ObjectId } from 'mongodb';
 
-import MeetupDetail from "@/components/meetups/MeetupDeatils";
+import MeetupDetail from '@/components/meetups/MeetupDeatils';
 
-function MeetupDetails({ meetupData }) {
+function MeetupDetails(props) {
   return (
     <MeetupDetail
-      image={meetupData.image}
-      title={meetupData.title}
-      address={meetupData.address}
-      description={meetupData.description}
+      image={props.meetupData.image}
+      title={props.meetupData.title}
+      address={props.meetupData.address}
+      description={props.meetupData.description}
     />
   );
 }
 
 export async function getStaticPaths() {
+  const client = await MongoClient.connect(
+    'mongodb+srv://bhavanibhavaniii2002:6fvVexGY6c4n4C5i@cluster0.gkhrfdf.mongodb.net/meetups?retryWrites=true&w=majority'
+  );
+  const db = client.db();
+
+  const meetupsCollection = db.collection('meetups');
+
+  const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
+
+  client.close();
+
   return {
     fallback: false,
-    paths: [
-      {
-        params: {
-          meetid: 'm1', // Use "meetid" here
-        },
-      },
-      {
-        params: {
-          meetid: 'm2', // Use "meetid" here
-        },
-      },
-    ],
+    paths: meetups.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
   };
 }
 
 export async function getStaticProps(context) {
   // fetch data for a single meetup
-  const meetid = context.params.meetid; // Use "meetid" here
 
-  // Replace this with your actual data fetching logic
-  const meetupData = {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg',
-    id: meetid, // Use "meetid" here
-    title: 'First Meetup',
-    address: 'Some Street 5, Some City',
-    description: 'This is a first meetup',
-  };
+  const meetupId = context.params.meetupId;
+
+  const client = await MongoClient.connect(
+    'mongodb+srv://bhavanibhavaniii2002:6fvVexGY6c4n4C5i@cluster0.gkhrfdf.mongodb.net/meetups?retryWrites=true&w=majority'
+  );
+  const db = client.db();
+
+  const meetupsCollection = db.collection('meetups');
+
+  const selectedMeetup = await meetupsCollection.findOne({
+    _id: ObjectId(meetupId),
+  });
+
+  client.close();
 
   return {
     props: {
-      meetupData,
+      meetupData: {
+        id: selectedMeetup._id.toString(),
+        title: selectedMeetup.title,
+        address: selectedMeetup.address,
+        image: selectedMeetup.image,
+        description: selectedMeetup.description,
+      },
     },
   };
 }
